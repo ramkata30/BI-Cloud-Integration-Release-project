@@ -73,7 +73,26 @@ jobs:
           echo "$FILES" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      # Step 5: Execute SQL files sequentially against Redshift
+      # Step 5: Validate SQL files before execution
+      - name: Validate SQL syntax
+        env:
+          REDSHIFT_HOST: ${{ secrets.REDSHIFT_HOST }}
+          REDSHIFT_PORT: 5439
+          REDSHIFT_DB: ${{ secrets.REDSHIFT_DB }}
+          REDSHIFT_USER: ${{ secrets.REDSHIFT_USER }}
+          REDSHIFT_PASSWORD: ${{ secrets.REDSHIFT_PASSWORD }}
+        run: |
+          for file in ${{ steps.prepare-sql.outputs.files }}; do
+            echo "-----------------------------------"
+            echo "Validating: $file"
+            echo "-----------------------------------"
+            # Wrap in BEGIN/ROLLBACK to ensure no changes are committed
+            (echo "BEGIN;"; cat "$file"; echo "ROLLBACK;") | \
+              psql "host=$REDSHIFT_HOST port=$REDSHIFT_PORT dbname=$REDSHIFT_DB user=$REDSHIFT_USER password=$REDSHIFT_PASSWORD sslmode=require" \
+              -v ON_ERROR_STOP=1
+          done
+
+      # Step 6: Execute SQL files sequentially against Redshift
       - name: Run SQL on Redshift
         env:
           REDSHIFT_HOST: ${{ secrets.REDSHIFT_HOST }}
