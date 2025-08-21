@@ -61,7 +61,7 @@ jobs:
               echo "Sorting SQL files alphabetically by default..."
               FILES=$(ls "$SQL_PATH"/*.sql | sort)
             else
-              echo "❌ Invalid sql_path: $SQL_PATH"
+              echo "Invalid sql_path: $SQL_PATH"
               exit 1
             fi
           fi
