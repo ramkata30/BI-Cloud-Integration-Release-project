@@ -86,5 +86,40 @@ For the deployment of SQL scripts to AWS Redshift, you need to build a GitHub Ac
 # Error Handling
 - psql -v ON_ERROR_STOP=1 ensures the workflow fails immediately if any SQL file encounters an error.
 
+# AWS CLI Commands to Interact with the created cluster:
+
+- Security Groups:
+  
+Ensure your Redshift cluster's security group allows inbound connections from the IP address or security group of your client machine.
+
+- IAM Permissions:
+  
+The AWS user or role used with the AWS CLI must have the necessary IAM permissions to perform these actions (e.g., redshift: GetClusterCredentials, redshift-data:*).
+
+- Endpoint and Port:
+When connecting with a SQL client, you will need the cluster's endpoint and port, which can be found in the Amazon Redshift console.
+
+
+
+aws redshift get-cluster-credentials \
+    --db-user <your_db_user> \
+    --cluster-identifier <your_cluster_identifier> \
+    --db-name <your_db_name> \
+    --duration-seconds 3600
+
+
+
+aws redshift-data execute-statement \
+    --cluster-identifier <your_cluster_identifier> \
+    --database <your_db_name> \
+    --db-user <your_db_user> \
+    --sql "SELECT * FROM your_table LIMIT 10;
+
+
+
+
+
+
+
 
 
